@@ -6,10 +6,12 @@ import ElementUI from 'element-ui'
 import router from './router'
 
 Vue.config.productionTip = false
-
+// Vue.prototype.ip = 'http://123.206.64.198/admin';
+Vue.prototype.ip = 'http://127.0.0.1:3000';
 Vue.use(ElementUI)
 /* eslint-disable no-new */
 import 'element-ui/lib/theme-default/index.css'
+
 new Vue({
   el: '#app',
   router,

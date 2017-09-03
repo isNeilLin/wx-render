@@ -13,12 +13,12 @@
       </template>
     </el-table-column>
     <el-table-column
-      label="简介"
+      label="内容简介"
       align="center"
       >
       <template scope="scope">
           <div slot="reference" class="name-wrapper">
-            <el-tag>{{ scope.row.profile }}</el-tag>
+            <el-tag>{{ scope.row.content }}</el-tag>
           </div>
       </template>
     </el-table-column>
@@ -37,36 +37,46 @@
 </template>
 
 <script>
+  import axios from 'axios'
   export default {
+    created(){
+      axios.get(`${this.ip}/article`).then(res=>{
+        let data = res.data;
+        if(data.code===0){
+          this.tableData = data.data
+        }else{
+          this.$alert(data.msg||JSON.stringify(data.stack))
+        }
+      }).catch(e=>{
+        this.$alert(e.message);
+      })
+    },
     data() {
       return {
-        tableData: [{
-          title: '标题1',
-          profile: '暂无简介',
-          content: '这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容'
-        }, {
-          title: '标题2',
-          profile: '暂无简介',
-          content: '这是内容'
-        }, {
-          title: '标题3',
-          profile: '暂无简介',
-          content: '这是内容'
-        }, {
-          title: '标题4',
-          profile: '暂无简介',
-          content: '这是内容'
-        }]
+        tableData: null
       }
     },
     methods: {
       handleEdit(index, row) {
+        console.log(row)
         this.$router.push({
-            path: `/article/update/:${index}`
+            path: `/article/update/:${row.id}`
         })
       },
       handleDelete(index, row) {
-        this.tableData.splice(index,1)
+        axios.post(`${this.ip}/article/del`,{
+          id: row.id
+        }).then(res=>{
+          let data = res.data
+          if(res.code===0){
+            this.$alert('删除成功')
+            this.tableData.splice(index,1)
+          }else{
+            this.$alert('删除失败',data.msg||JSON.stringify(data.stack))
+          }
+        }).catch(e=>{
+          this.$alert('删除失败',e.message)
+        })
       }
     }
   }

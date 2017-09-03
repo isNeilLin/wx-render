@@ -30,10 +30,18 @@
   </el-row>
 </template>
 <script>
+  import axios from 'axios'
   export default {
+    created(){
+        this.token = window.localStorage.getItem('token');
+        axios.defaults.params = {
+            token: this.token
+        }
+    },
     data() {
         return {
             username: '',
+            token: null,
             articleList: {
                 path: '/article/list'
             },

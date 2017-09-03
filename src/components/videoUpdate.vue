@@ -1,11 +1,19 @@
 <template>
-  <el-form ref="form" label-width="80px" id="video">
+  <el-form ref="form" 
+    v-loading="loading"
+    element-loading-text="text"
+    label-width="80px">
     <el-form-item label="上传视频" name="video">
         <el-upload
             class="upload-demo"
-            action=""
+            :action="url"
             drag
-            multiple
+            ref="upload"
+            :data="uploadData"
+            :on-preview="handlePreview"
+            :on-success = "successHandler"
+            :on-progress = "progressHandler"
+            :on-error = "errorHandler"
             :auto-upload="false"
             >
             <i class="el-icon-upload"></i>
@@ -20,21 +28,52 @@
 </template>
 
 <script>
+  import axios from 'axios'
   export default {
-    created(){
-        if(this.$route.params.id){
-            let id = this.$route.params.id
-            id = ~~(id.slice(1,id.length));
-            if(id!==-1){
+    data(){
+        return {
+            url: `${this.ip}/video/add`,
+            uploadData: {
+                token: null,
                 
-            }
+            },
+            text: null,
+            loading: false
         }
     },
     methods: {
       onSubmit() {
-        let video = document.getElementById('video');
-        let videoData = new FormData(audio);
-        
+          this.uploadData.token = window.localStorage.getItem('token')
+          console.log(this.uploadData)
+          this.$refs.upload.submit()
+      },
+      handlePreview(file){
+          console.log(file)
+      },
+      successHandler(response){
+        console.log(response)
+        this.loading = false;
+        if(response.code!==0){
+            this.$alert('上传失败',response.msg||JSON.stringify(response.stack))
+            return
+        }
+        this.$alert('上传成功','', {
+            callback: () => {
+                this.$router.push({
+                    path: '/video/list'
+                })
+            }
+        })
+      },
+      errorHandler(e){
+          console.log(e)
+          this.loading = false;
+          this.$alert('上传失败',e.msg||JSON.stringify(e))
+      },
+      progressHandler(event){
+          this.loading = true
+          let percent = event.percent;
+          this.text = `正在上传: ${percent}%`
       }
     }
   }

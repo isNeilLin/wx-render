@@ -1,8 +1,8 @@
 <template>
-  <el-form ref="form" :model="form" label-width="80px" id="audio">
+  <el-form ref="form" :model="form" label-width="80px">
     <el-form-item label="添加到" name="album">
         <el-col :span="11">
-        <el-select v-model="value" placeholder="请选择" align="left">
+        <el-select v-model="value" @change="selectChange" placeholder="请选择" align="left">
             <el-option
             v-for="item in options"
             :key="item.value"
@@ -14,10 +14,15 @@
     </el-form-item>
     <el-form-item label="上传文件" name="audio">
         <el-upload
-            class="upload-demo"
-            action=""
             drag
+            class="upload-demo"
+            :action="url"
+            ref="upload"
             multiple
+            :data="uploadData"
+            :on-preview="handlePreview"
+            :on-success = "successHandler"
+            :on-error = "errorHandler"
             :auto-upload="false"
             >
             <i class="el-icon-upload"></i>
@@ -32,46 +37,75 @@
 </template>
 
 <script>
+  import axios from 'axios'  
   export default {
     created(){
-        if(this.$route.params.id){
-            let id = this.$route.params.id
-            id = ~~(id.slice(1,id.length));
-            if(id!==-1){
-                
+        this.url = `${this.ip}/audio/add`;
+        axios.get(`${this.ip}/album`).then(res=>{
+            let data = res.data;
+            if(data.code===0){
+            this.options = data.data.map(data=>{
+                return {
+                    label: data.title,
+                    value: data.id
+                }
+            })
+            }else{
+                this.$alert(data.msg||JSON.stringify(data.stack))
             }
-        }
+        }).catch(e=>{
+            this.$alert(e.message);
+        })
     },
     data() {
       return {
+        url:null,
+        uploadData: {
+            id: null,
+            album_name: null,
+            token: null
+        },
         form: {
           name: ''
         },
         value: '',
-        options: [
-            {
-                label: '专辑1',
-                value: '专辑1'
-            },
-            {
-                label: '专辑2',
-                value: '专辑2'
-            },
-            {
-                label: '专辑3',
-                value: '专辑3'
-            }
-        ]
+        label: '',
+        options: null
       }
     },
     methods: {
+      selectChange(e){
+        let obj = {};
+        obj = this.options.find((item)=>{
+            return item.value === e;
+        });
+        this.label = obj.label
+      },
       onSubmit() {
-        let audio = document.getElementById('audio');
-        let audios = new FormData(audio);
-        let files = new FormData();
-        let title = this.value;
-        files.append('title',title);
-        files.append('audio',audios);
+        this.uploadData.id = this.value
+        this.uploadData.album_name = this.label
+        this.uploadData.token = window.localStorage.getItem('token')
+        console.log(this.uploadData)
+        this.$refs.upload.submit()
+      },
+      handlePreview(file){
+          console.log(file)
+      },
+      successHandler(response){
+        if(response.code!==0){
+            this.$alert('上传失败',response.msg||JSON.stringify(response.stack))
+            return
+        }
+        this.$alert('上传成功','', {
+            callback: () => {
+                this.$router.push({
+                    path: '/audio/list'
+                })
+            }
+        })
+      },
+      errorHandler(e){
+          this.$alert('上传失败',e.msg||JSON.stringify(e))
       }
     }
   }

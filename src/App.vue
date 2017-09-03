@@ -14,6 +14,7 @@
 <script>
 export default {
   created(){
+    this.checkToken()
     if(this.$route.path==='/'){
       this.isLogin = false;
     }else{
@@ -23,6 +24,7 @@ export default {
     }
   },
   updated(){
+    this.checkToken()
     if(this.$route.path==='/'){
       this.isLogin = false;
     }else{
@@ -39,8 +41,15 @@ export default {
   },
   methods: {
     logout(){
-      this.$router.push('/');
-      window.localStorage.removeItem('username');
+      this.$router.push('/')
+      window.localStorage.removeItem('username')
+      window.localStorage.removeItem('token')
+    },
+    checkToken(){
+      let token = window.localStorage.getItem('token')
+      if(!token){
+        this.$router.push('/')
+      }
     }
   }
 }

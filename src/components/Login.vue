@@ -16,6 +16,7 @@
   </div>
 </template>
 <script>
+  import axios from 'axios'
   export default {
     data() {
       return {
@@ -34,8 +35,28 @@
           this.showWarn()
           return false
         }
-        this.$router.push({path:'/home'})
-        window.localStorage.setItem('username',username)
+        axios.post(`${this.ip}/user/login`,{
+          'username': username,
+          'password': password
+        }).then(res=>{
+          console.log(res)
+          let data = res.data;
+          if(data.code===0){
+            this.$alert(data.msg,'',{
+               confirmButtonText: '确定',
+               callback:()=>{
+                  this.$router.push({path:'/home'})
+                  window.localStorage.setItem('username',username)
+                  window.localStorage.setItem('token',data.token)
+               }
+            })
+          }else{
+            this.$alert(data.msg,'登录失败')
+          }
+        }).catch(e=>{
+          this.$alert(e.message)
+        })
+        return false;
       },
       showWarn() {
         this.$msgbox({

@@ -9,7 +9,7 @@
       align="center"
       >
       <template scope="scope">
-        <span style="margin-left: 10px">{{ scope.row.title }}</span>
+        <span style="margin-left: 10px">{{ scope.row.name }}</span>
       </template>
     </el-table-column>
     <el-table-column
@@ -18,7 +18,7 @@
       >
       <template scope="scope">
           <div slot="reference" class="name-wrapper">
-            <audio :src="scope.row.src" controls>{{ scope.row.title }}</audio>
+            <audio :src="scope.row.src" controls>{{ scope.row.name }}</audio>
           </div>
       </template>
     </el-table-column>
@@ -28,14 +28,11 @@
       align="center"
       >
       <template scope="scope">
-        <span style="margin-left: 10px">{{ scope.row.album }}</span>
+        <span style="margin-left: 10px">{{ scope.row.album_name }}</span>
       </template>
     </el-table-column>
     <el-table-column label="操作" width="180" align="center">
       <template scope="scope">
-        <el-button
-          size="small"
-          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
         <el-button
           size="small"
           type="danger"
@@ -46,40 +43,41 @@
 </template>
 
 <script>
+  import axios from 'axios'
   export default {
+    created(){
+      axios.get(`${this.ip}/audio`).then(res=>{
+        let data = res.data;
+        console.log(data)
+        if(data.code===0){
+          this.tableData = data.data
+        }else{
+          this.$alert(data.msg||JSON.stringify(data.stack))
+        }
+      }).catch(e=>{
+        this.$alert(e.message);
+      })
+    },
     data() {
       return {
-        tableData: [{
-          title: '标题1',
-          src: 'test.mp3',
-          album: '专辑1',
-          content: '这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容'
-        }, {
-          title: '标题2',
-          src: 'test.mp3',
-          album: '专辑1',
-          content: '这是内容'
-        }, {
-          title: '标题3',
-          src: 'test.mp3',
-          album: '专辑1',
-          content: '这是内容'
-        }, {
-          title: '标题4',
-          src: 'test.mp3',
-          album: '专辑1',
-          content: '这是内容'
-        }]
+        tableData: null
       }
     },
     methods: {
-      handleEdit(index, row) {
-        this.$router.push({
-            path: `/audio/update/:${index}`
-        })
-      },
       handleDelete(index, row) {
-        this.tableData.splice(index,1)
+        axios.post(`${this.ip}/audio/del`,{
+          id: row.id
+        }).then(res=>{
+          let data = res.data
+          if(data.code===0){
+            this.$alert('删除成功')
+            this.tableData.splice(index,1)
+          }else{
+            this.$alert('删除失败',data.msg||JSON.stringify(data.stack))
+          }
+        }).catch(e=>{
+          this.$alert('删除失败',e.message)
+        })
       }
     }
   }
