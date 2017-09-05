@@ -47,6 +47,8 @@
                callback:()=>{
                   this.$router.push({path:'/home'})
                   window.localStorage.setItem('username',username)
+                  window.localStorage.setItem('id',data.id)
+                  window.localStorage.setItem('access',data.access)
                   window.localStorage.setItem('token',data.token)
                }
             })

@@ -10,6 +10,8 @@ import videoList from '@/components/videoList'
 import videoUpdate from '@/components/videoUpdate'
 import albumList from '@/components/albumList'
 import albumAdd from '@/components/albumAdd'
+import userList from '@/components/userList'
+import me from '@/components/me'
 
 Vue.use(Router)
 
@@ -88,6 +90,23 @@ const router = new Router({
           path: 'update/:id',
           name: 'videoUpdate',
           component: videoUpdate
+        }
+      ]
+    },
+    {
+      path: '/user',
+      name: 'user',
+      component: Home,
+      children: [
+        {
+          path: 'list',
+          name: 'userList',
+          component: userList
+        },
+        {
+          path: 'me',
+          name: 'me',
+          component: me
         }
       ]
     }
