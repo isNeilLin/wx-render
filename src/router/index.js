@@ -12,6 +12,7 @@ import albumList from '@/components/albumList'
 import albumAdd from '@/components/albumAdd'
 import userList from '@/components/userList'
 import me from '@/components/me'
+import addUser from '@/components/addUser'
 
 Vue.use(Router)
 
@@ -107,6 +108,11 @@ const router = new Router({
           path: 'me',
           name: 'me',
           component: me
+        },
+        {
+          path: 'add',
+          name: 'addUser',
+          component: addUser
         }
       ]
     }
