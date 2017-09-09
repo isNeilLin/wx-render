@@ -26,6 +26,7 @@
             <template slot="title">账号管理</template>
             <el-menu-item :route="userList" index="13">管理员列表</el-menu-item>
             <el-menu-item :route="me" index="14">更改密码</el-menu-item>
+            <el-menu-item :route="addUser" index="16">添加管理员</el-menu-item>
         </el-submenu>
         </el-menu>
     </el-col>
@@ -76,6 +77,9 @@
             },
             me: {
                 path: '/user/me'
+            },
+            addUser: {
+                path: '/user/add'
             }
         }
     },
