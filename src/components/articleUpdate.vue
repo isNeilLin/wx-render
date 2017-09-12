@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <input :value="title" class="title" :placeholder="placeholder" @input="titleChange"></input>
+    <input v-model="title" class="title" :placeholder="placeholder" @input="titleChange"></input>
     <vue-editor v-model="content" id="editor" @input="input"></vue-editor>
     <el-button type="primary" @click="setEditorContent" id="saveContent">立即上传</el-button>
   </div>
@@ -12,12 +12,9 @@
         created(){
             this.checkRoute()
         },
-        updated(){
-            this.checkRoute()
-        },
         data() {
             return {
-                title: null,
+                title: '',
                 content: '',
                 placeholder: null,
                 result: null,

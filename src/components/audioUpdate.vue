@@ -93,7 +93,7 @@
       },
       successHandler(response){
         if(response.code!==0){
-            this.$alert('上传失败',response.msg||JSON.stringify(response.stack))
+            this.$alert(response.msg||JSON.stringify(response.stack),'上传失败')
             return
         }
         this.$alert('上传成功','', {
@@ -105,7 +105,7 @@
         })
       },
       errorHandler(e){
-          this.$alert('上传失败',e.msg||JSON.stringify(e))
+          this.$alert(e.msg||JSON.stringify(e),'上传失败')
       }
     }
   }

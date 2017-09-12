@@ -68,13 +68,15 @@
           id: row.id
         }).then(res=>{
           let data = res.data
-          if(res.code===0){
+          if(data.code===0){
             this.$alert('删除成功')
             this.tableData.splice(index,1)
           }else{
+            console.log(res)
             this.$alert('删除失败',data.msg||JSON.stringify(data.stack))
           }
         }).catch(e=>{
+          console.log(e)
           this.$alert('删除失败',e.message)
         })
       }
