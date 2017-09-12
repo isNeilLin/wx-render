@@ -19,9 +19,6 @@
     created(){
         this.checkRoute()
     },
-    updated(){
-        this.checkRoute()
-    },
     data() {
       return {
         id: null,

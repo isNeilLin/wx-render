@@ -73,7 +73,8 @@
       progressHandler(event){
           this.loading = true
           let percent = event.percent;
-          this.text = `正在上传: ${percent}%`
+          this.text = `正在上传: ${percent}%`;
+          console.log(this.text)
       }
     }
   }
