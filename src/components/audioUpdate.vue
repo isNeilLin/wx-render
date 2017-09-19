@@ -1,4 +1,5 @@
 <template>
+<div>
   <el-form ref="form" :model="form" label-width="80px">
     <el-form-item label="添加到" name="album">
         <el-col :span="11">
@@ -13,31 +14,51 @@
         </el-col>
     </el-form-item>
     <el-form-item label="上传文件" name="audio">
-        <el-upload
-            drag
-            class="upload-demo"
-            :action="url"
+        <upload
             ref="upload"
-            multiple
-            :data="uploadData"
-            :on-preview="handlePreview"
-            :on-success = "successHandler"
-            :on-error = "errorHandler"
-            :auto-upload="false"
-            >
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        </el-upload>
+            class="upload"
+            v-model="files"
+            :data="params"
+            :multiple="true"
+            :post-action="url"
+            @input="updatetValue"
+            @input-filter="inputFilter"
+        >选择音频文件</upload>
     </el-form-item>
+    <el-table
+      v-if="files.length"  
+      :data="files"
+      style="width: 100%">
+      <el-table-column
+        prop="name"
+        label="文件名"
+        align="center"
+      >
+      </el-table-column>
+      <el-table-column
+        prop="realSize"
+        label="文件大小"
+        align="center"
+        width="150">
+      </el-table-column>
+      <el-table-column
+        prop="status"
+        align="center"
+        width="300"
+        label="上传状态">
+      </el-table-column>
+    </el-table>
     <el-form-item>
         <el-button type="primary" @click="onSubmit">立即上传</el-button>
         <el-button>取消</el-button>
     </el-form-item>
     </el-form>
+</div>
 </template>
 
 <script>
-  import axios from 'axios'  
+  import axios from 'axios'
+  import upload from 'vue-upload-component'
   export default {
     created(){
         this.url = `${this.ip}/audio/add`;
@@ -60,11 +81,12 @@
     data() {
       return {
         url:null,
-        uploadData: {
+        params: {
             id: null,
             album_name: null,
             token: null
         },
+        files: [],
         form: {
           name: ''
         },
@@ -73,40 +95,67 @@
         options: null
       }
     },
+    components: {
+        upload: upload
+    },
     methods: {
-      selectChange(e){
-        let obj = {};
-        obj = this.options.find((item)=>{
-            return item.value === e;
-        });
-        this.label = obj.label
-      },
-      onSubmit() {
-        this.uploadData.id = this.value
-        this.uploadData.album_name = this.label
-        this.uploadData.token = window.localStorage.getItem('token')
-        console.log(this.uploadData)
-        this.$refs.upload.submit()
-      },
-      handlePreview(file){
-          console.log(file)
-      },
-      successHandler(response){
-        if(response.code!==0){
-            this.$alert(response.msg||JSON.stringify(response.stack),'上传失败')
-            return
-        }
-        this.$alert('上传成功','', {
-            callback: () => {
-                this.$router.push({
-                    path: '/audio/list'
-                })
+        selectChange(e){
+            let obj = {};
+            obj = this.options.find((item)=>{
+                return item.value === e;
+            });
+            this.label = obj.label
+        },
+        onSubmit() {
+            let i = 0;
+            this.uploadFile(i)
+        },
+        uploadFile(i){
+            this.files[i].status = '正在上传...'
+            if(i===this.files.length){
+                this.$refs.upload.clear();
+                this.files = [];
+                return false;
             }
-        })
-      },
-      errorHandler(e){
-          this.$alert(e.msg||JSON.stringify(e),'上传失败')
-      }
+            let token = window.localStorage.getItem('token')
+            let formdata = new FormData();
+            formdata.append('id',this.value)
+            formdata.append('album_name',this.label)
+            formdata.append('token',token)
+            formdata.append('file',this.files[i].file);
+            axios.post(this.url,formdata).then(res=>{
+                this.files[i].status = '上传成功'
+                this.uploadFile(++i);
+            }).catch(e=>{
+                this.files[i].status = '上传失败'
+            })
+        },
+        inputFilter: function(newFile, oldFile, prevent) {
+            if (newFile && !oldFile) {
+                // 过滤 非 图片文件
+                if (newFile.type.indexOf('audio')!=-1) {
+                    prevent()
+                }
+            }
+            // 创建 blob 字段
+            newFile.blob = ''
+            let URL = window.URL || window.webkitURL
+            if (URL && URL.createObjectURL) {
+                newFile.blob = URL.createObjectURL(newFile.file)
+            }
+            newFile = this.addFileds(newFile);
+            this.files.push(newFile)
+        },
+        addFileds(newFile){
+            console.log(newFile)
+            newFile.status = newFile.acitve ? '正在上传' : '等待上传';
+            newFile.realSize = (newFile.size/1024/1024).toFixed(2)+'M';
+            return newFile;
+        },
+        updatetValue(value) {
+            console.log(value)
+            this.files = value
+        }
     }
   }
 </script>
@@ -114,10 +163,28 @@
     .el-form {
         margin: 16px;
     }
+    .el-table {
+        margin-bottom: 16px;
+    }
     .el-input {
         width: 220px;
     }
     .upload-demo,.el-col-11,.el-form-item__content {
         text-align: left;
+    }
+    .upload {
+        width: 120px;
+        height: 36px;
+        background: #20a0ff;
+        border: 1px solid #20a0ff;
+        color: #fff;
+        margin: 0;
+        border-radius: 4px;
+        box-sizing: border-box;
+        line-height:36px;
+        cursor: pointer;
+    }
+    .upload:hover {
+        opacity: 0.8;
     }
 </style>

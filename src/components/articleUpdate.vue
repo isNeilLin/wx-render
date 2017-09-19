@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <input v-model="title" class="title" :placeholder="placeholder" @input="titleChange"></input>
-    <vue-editor v-model="content" id="editor" @input="input"></vue-editor>
+    <vue-editor v-model="content" id="editor" ref="editor" @input="input"></vue-editor>
     <el-button type="primary" @click="setEditorContent" id="saveContent">立即上传</el-button>
   </div>
 </template>
@@ -11,6 +11,25 @@
     export default {
         created(){
             this.checkRoute()
+        },
+        mounted(){
+            let toolElements = this.$refs.editor.$el.firstChild.children;
+            let tools = [];
+            for(let node of toolElements){
+                for(let childNode of node.children){
+                    if(childNode.nodeName!=='SELECT'){
+                        tools.push(childNode)
+                    }
+                }
+            }
+            let titles = [
+                '加粗','斜体','下划线','删除线','引用','代码','插入图片','有序列表',
+                '无序列表','左缩进','右缩进','字号','字体颜色','背景颜色','字体',
+                '居中方式','清除格式'
+            ]
+            tools.forEach(function(node,index) {
+                node.title = titles[index]
+            })
         },
         data() {
             return {

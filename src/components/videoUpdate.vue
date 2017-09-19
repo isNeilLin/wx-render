@@ -1,7 +1,5 @@
 <template>
   <el-form ref="form" 
-    v-loading="loading"
-    element-loading-text="text"
     label-width="80px">
     <el-form-item label="上传视频" name="video">
         <el-upload
@@ -37,8 +35,7 @@
                 token: null,
                 
             },
-            text: null,
-            loading: false
+            loading: null
         }
     },
     methods: {
@@ -51,8 +48,7 @@
           console.log(file)
       },
       successHandler(response){
-        console.log(response)
-        this.loading = false;
+        this.loading.close();
         if(response.code!==0){
             this.$alert('上传失败',response.msg||JSON.stringify(response.stack))
             return
@@ -67,14 +63,14 @@
       },
       errorHandler(e){
           console.log(e)
-          this.loading = false;
+          this.loading.close();
           this.$alert('上传失败',e.msg||JSON.stringify(e))
       },
       progressHandler(event){
-          this.loading = true
-          let percent = event.percent;
-          this.text = `正在上传: ${percent}%`;
-          console.log(this.text)
+          this.text = '正在上传 ...';
+          this.loading = this.$loading({
+              text: this.text
+          })
       }
     }
   }

@@ -1,11 +1,27 @@
 <template>
-  <el-table
+ <div>
+    <div class="handler">
+      <el-button
+          type="danger"
+          class="delete"
+          :disabled="selected"
+          @click="deleteMutily">批量删除</el-button>
+    </div>
+    <el-table
     :data="tableData"
     border
+    @selection-change="handleSelectionChange"
     style="width: 100%;margin:16px 16px;">
+    <el-table-column
+      type="selection"
+      width="80"
+      align="center"
+      >
+    </el-table-column>
     <el-table-column
       label="标题"
       width="240"
+      sortable
       align="center"
       >
       <template scope="scope">
@@ -34,6 +50,7 @@
       </template>
     </el-table-column>
   </el-table>
+ </div>
 </template>
 
 <script>
@@ -53,7 +70,9 @@
     },
     data() {
       return {
-        tableData: null
+        tableData: null,
+        select: [],
+        selected: true
       }
     },
     methods: {
@@ -61,6 +80,48 @@
         console.log(row)
         this.$router.push({
             path: `/article/update/:${row.id}`
+        })
+      },
+      handleSelectionChange(val){
+        this.select = val;
+        this.selected = val.length ? false : true;
+      },
+      deleteMutily(){
+        let deleteArr = this.select.map(item=>{
+          return this.deleteSingle(item.id)
+        })
+        Promise.all(deleteArr).then(res=>{
+          for(let item of this.select){
+            this.deleteUI(item.title)
+          }
+          this.$alert('删除成功')
+        }).catch(e=>{
+          console.log(e)
+          this.$alert('删除失败',e)
+        })
+      },
+      deleteUI(name){
+        console.log(this.tableData)
+        let names = this.tableData.map(item=>item.title);
+        let index = names.indexOf(name);
+        if(index!==-1){
+          this.tableData.splice(index,1)
+        }
+      },
+      deleteSingle(id){
+        return new Promise((resolve,reject)=>{
+          return axios.post(`${this.ip}/article/del`,{
+            id: id
+          }).then(res=>{
+            let data = res.data
+            if(data.code===0){
+              resolve()
+            }else{
+              reject(data.msg)
+            }
+          }).catch(e=>{
+            reject(e)
+          })
         })
       },
       handleDelete(index, row) {
@@ -83,3 +144,10 @@
     }
   }
 </script>
+<style>
+.handler {
+        margin-top: 16px;
+        margin-left: 16px;
+        text-align: left;
+      }
+</style>
